@@ -5,68 +5,100 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: ftaffore <ftaffore@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2013/12/02 13:54:04 by ftaffore          #+#    #+#             */
-/*   Updated: 2013/12/04 15:42:28 by ftaffore         ###   ########.fr       */
+/*   Created: 2015/03/31 11:38:05 by ftaffore          #+#    #+#             */
+/*   Updated: 2015/03/31 11:38:06 by ftaffore         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include				<stdlib.h>
-#include				"get_next_line.h"
-#include				"libft.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include "libft.h"
+#include "get_next_line.h"
 
-static int				get_next_read(int fd, char *buff, unsigned int *i)
+static t_chain				*create_chain(t_chain *all_chains, int fd)
 {
-	int					len;
+	t_chain					*new_elem;
 
-	len = 0;
-	if (*i > 0 && *i <= ft_strlen(buff))
-		return (1);
-	if ((len = read(fd, buff, BUFF_SIZE + 1)) < 0)
-		return (len);
-	*i = 0;
-	buff[len] = '\0';
-	return (len);
+	if ((new_elem = ft_memalloc(sizeof(*new_elem))) == NULL)
+		return (NULL);
+	new_elem->i = 0;
+	new_elem->n = 0;
+	new_elem->len = 0;
+	ft_bzero(new_elem->buff, BUFF_SIZE);
+	new_elem->fd = fd;
+	new_elem->next = all_chains;
+	return (new_elem);
 }
 
-static char				*my_strconcat(char *dst, char *src, int n)
+static t_chain				*get_chain(int fd)
 {
-	char				*res;
+	static t_chain			*all_chains = NULL;
+	t_chain					*ptr;
 
-	res = NULL;
-	res = ft_strnew((int)(ft_strlen(dst) + n));
-	if (res == NULL)
-		return (NULL);
-	if (dst != NULL)
+	ptr = all_chains;
+	while (ptr != NULL && ptr->fd != fd)
+		ptr = ptr->next;
+	if (ptr == NULL)
 	{
-		res = ft_strcat(res, dst);
-		free(dst);
-		dst = NULL;
+		all_chains = create_chain(all_chains, fd);
+		return (all_chains);
 	}
-	res = ft_strncat(res, src, n);
-	return (res);
+	return (ptr);
+}
+
+static int					read_next(t_chain *chain)
+{
+	if (chain->i > 0 && chain->i < chain->len)
+		return (1);
+	chain->i = 0;
+	chain->n = 0;
+	ft_bzero(chain->buff, BUFF_SIZE);
+	chain->len = read(chain->fd, chain->buff, BUFF_SIZE);
+	if (chain->len < 0)
+		return (-1);
+	else if (chain->len == 0)
+		return (0);
+	return (1);
+}
+
+static int					my_strconcat(char **line, t_chain *chain)
+{
+	char					*res;
+
+	res = ft_memalloc(ft_strlen(*line) + chain->n - chain->i + 1);
+	if (res == NULL)
+		return (-1);
+	if (*line != NULL)
+	{
+		res = ft_strcat(res, *line);
+		free(*line);
+		*line = NULL;
+	}
+	res = ft_strncat(res, &(chain->buff[chain->i]), chain->n - chain->i);
+	*line = res;
+	chain->n += 1;
+	chain->i = chain->n;
+	return (0);
 }
 
 int							get_next_line(int fd, char **line)
 {
-	static unsigned int		i = 0;
-	static char 			buff[BUFF_SIZE + 1];
-	char					*end;
-	int						n;
+	t_chain					*c;
 
-	n = 0;
-	(*line) = NULL;
-	end = NULL;
-	while ((n = get_next_read(fd, buff, &i)) > 0)
+	*line = NULL;
+	if ((c = get_chain(fd)) == NULL)
+		return (-1);
+	while (read_next(c) > 0)
 	{
-		end = ft_strchr((char *)&buff[i], (int)'\n');
-		n = ft_strchr_index((char *)&buff[i], (int)'\n');
-		if (((*line) = my_strconcat(*line, &buff[i], n)) == NULL)
+		c->n = ft_strchr_index((char *)&(c->buff[c->i]), (int)'\n');
+		c->n += c->i;
+		if (my_strconcat(line, c) < 0)
 			return (-1);
-		i += n + 1;
-		if (end != NULL)
+		if (c->n < c->len || \
+			(c->n == c->len && c->buff[c->n - 1] == '\n'))
 			return (1);
 	}
-	if ((*line) != NULL)
+	if (*line != NULL)
 		return (1);
-	return (n);
+	return (c->len);
 }

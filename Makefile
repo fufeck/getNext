@@ -21,7 +21,7 @@ RM		=		rm -f
 CFLAGS	=		-Werror -Wextra -Wall -W -I libft/includes
 
 SRCS	=		main.c 					\
-				get_next.c
+				get_next_line.c
 
 SRCS_L	=		libft/ft_memset.c		\
 				libft/ft_bzero.c 		\
@@ -29,6 +29,7 @@ SRCS_L	=		libft/ft_memset.c		\
 				libft/ft_strcat.c 		\
 				libft/ft_strncat.c 		\
 				libft/ft_strchr_index.c \
+				libft/ft_putstr.c \
 				libft/ft_strlen.c
 
 OBJS	=		$(SRCS:.c=.o)

@@ -10,15 +10,12 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef		GET_NEXT_LINE_H
-# define	GET_NEXT_LINE_H
+#ifndef GET_NEXT_LINE_H
+# define GET_NEXT_LINE_H
 
-#define BUFF_SIZE			100000000
+# define BUFF_SIZE	256
 
-
-int			get_next_line(int fd, char **line);
-
-typedef struct 		s_chain
+typedef struct		s_chain
 {
 	int				i;
 	int				n;
@@ -27,5 +24,7 @@ typedef struct 		s_chain
 	char			buff[BUFF_SIZE];
 	struct s_chain	*next;
 }					t_chain;
+
+int					get_next_line(int fd, char **line);
 
 #endif
