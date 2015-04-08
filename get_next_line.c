@@ -6,7 +6,7 @@
 /*   By: ftaffore <ftaffore@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2015/03/31 11:38:05 by ftaffore          #+#    #+#             */
-/*   Updated: 2015/03/31 11:38:06 by ftaffore         ###   ########.fr       */
+/*   Updated: 2015/04/08 15:27:45 by ftaffore         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,7 @@ static t_chain				*create_chain(t_chain *all_chains, int fd)
 	new_elem->i = 0;
 	new_elem->n = 0;
 	new_elem->len = 0;
-	ft_bzero(new_elem->buff, BUFF_SIZE);
+	ft_bzero(new_elem->buff, BUFF_SIZE + 1);
 	new_elem->fd = fd;
 	new_elem->next = all_chains;
 	return (new_elem);
@@ -52,12 +52,13 @@ static int					read_next(t_chain *chain)
 		return (1);
 	chain->i = 0;
 	chain->n = 0;
-	ft_bzero(chain->buff, BUFF_SIZE);
-	chain->len = read(chain->fd, chain->buff, BUFF_SIZE);
+	ft_bzero(chain->buff, BUFF_SIZE + 1);
+	chain->len = read(chain->fd, chain->buff, BUFF_SIZE + 1);
 	if (chain->len < 0)
 		return (-1);
 	else if (chain->len == 0)
 		return (0);
+	chain->buff[chain->len] = '\0';
 	return (1);
 }
 
@@ -85,9 +86,9 @@ int							get_next_line(int fd, char **line)
 {
 	t_chain					*c;
 
-	*line = NULL;
-	if ((c = get_chain(fd)) == NULL)
+	if (fd < 0 || line == NULL || (c = get_chain(fd)) == NULL)
 		return (-1);
+	*line = NULL;
 	while (read_next(c) > 0)
 	{
 		c->n = ft_strchr_index((char *)&(c->buff[c->i]), (int)'\n');

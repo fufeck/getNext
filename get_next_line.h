@@ -21,7 +21,7 @@ typedef struct		s_chain
 	int				n;
 	int				fd;
 	int				len;
-	char			buff[BUFF_SIZE];
+	char			buff[BUFF_SIZE + 1];
 	struct s_chain	*next;
 }					t_chain;
 

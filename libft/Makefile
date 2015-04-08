@@ -6,51 +6,42 @@
 #    By: ftaffore <ftaffore@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2013/11/20 15:15:50 by ftaffore          #+#    #+#              #
-#    Updated: 2014/03/23 13:11:15 by ftaffore         ###   ########.fr        #
+#    Updated: 2015/04/07 13:45:23 by ftaffore         ###   ########.fr        #
 #                                                                              #
 #******************************************************************************#
 
-NAME	=		test
+NAME_L		=	libft.a
 
-NAME_L	=		libft.a
+CC			=	gcc
 
-CC		=		gcc
+RM			=	rm -f
 
-RM		=		rm -f
+CFLAGS		=	-Werror -Wextra -Wall -W  -Iincludes
 
-CFLAGS	=		-Werror -Wextra -Wall -W -I libft/includes
 
-SRCS	=		main.c 					\
-				get_next_line.c
+SRCS_L		=	ft_memset.c			\
+				ft_bzero.c 			\
+				ft_memalloc.c 		\
+				ft_strcat.c 		\
+				ft_strncat.c 		\
+				ft_strchr_index.c 	\
+				ft_putstr.c 		\
+				ft_strlen.c
 
-SRCS_L	=		libft/ft_memset.c		\
-				libft/ft_bzero.c 		\
-				libft/ft_memalloc.c 	\
-				libft/ft_strcat.c 		\
-				libft/ft_strncat.c 		\
-				libft/ft_strchr_index.c \
-				libft/ft_putstr.c \
-				libft/ft_strlen.c
+OBJS_L		=	$(SRCS_L:.c=.o)
 
-OBJS	=		$(SRCS:.c=.o)
-
-OBJS_L	=		$(SRCS_L:.c=.o)
-
-all		:		$(NAME_L) $(NAME)
+all			:	$(NAME_L)
 
 $(NAME_L)	:	$(OBJS_L)
 				ar rc $(NAME_L) $(OBJS_L)
 				ranlib $(NAME_L)
 
-$(NAME)		:	$(OBJS)
-				$(CC) -o $(NAME) $(OBJS) $(CFLAGS) -L. -lft
+clean		:
+				$(RM) $(OBJS_L)
 
-clean	:
-				$(RM) $(OBJS_L) $(OBJS)
+fclean		:	clean
+				$(RM) $(NAME_L)
 
-fclean	:		clean
-				$(RM) $(NAME_L) $(NAME)
+re			:	fclean all
 
-re		:		fclean all
-
-.PHONY	:	all clean fclean re
+.PHONY		:	all clean fclean re
